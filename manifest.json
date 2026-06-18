@@ -1,0 +1,22 @@
+{
+  "name": "Treino Pós-Cesárea",
+  "short_name": "MeuTreino",
+  "description": "Plano de treino pós-cesárea com diástase — 5 meses",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F0EDE8",
+  "theme_color": "#7A9E8E",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

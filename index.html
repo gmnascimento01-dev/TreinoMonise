@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MeuTreino">
+<meta name="theme-color" content="#7A9E8E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Treino Pós-Cesárea</title>
+<style>
+/* ── TOKENS ── */
+:root {
+  --sage:        #7A9E8E;
+  --sage-light:  #B8D4C8;
+  --sage-pale:   #E8F2EE;
+  --blush:       #C9837A;
+  --blush-pale:  #F5ECEA;
+  --terra:       #B8735A;
+  --cream:       #F0EDE8;
+  --warm-white:  #FDFAF7;
+  --charcoal:    #2C2C2C;
+  --mid:         #6B6B6B;
+  --light:       #A8A8A8;
+  --rule:        #E0D8D0;
+  --danger:      #D94F3B;
+  --danger-pale: #FFF0EE;
+  --safe-top: env(safe-area-inset-top, 44px);
+  --safe-bot: env(safe-area-inset-bottom, 20px);
+}
+
+/* ── RESET ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  font-size: 15px;
+  line-height: 1.5;
+  overscroll-behavior: none;
+}
+
+/* ── LAYOUT ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  height: -webkit-fill-available;
+}
+
+/* ── STATUS BAR SPACE ── */
+.status-pad {
+  height: var(--safe-top);
+  background: var(--charcoal);
+  flex-shrink: 0;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--charcoal);
+  color: var(--warm-white);
+  padding: 12px 20px 14px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.topbar-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+.topbar-sub { font-size: 12px; color: var(--sage-light); margin-top: 1px; }
+.topbar-badge {
+  background: var(--sage);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+/* ── SCROLL AREA ── */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  display: flex;
+  background: var(--warm-white);
+  border-top: 1px solid var(--rule);
+  padding-bottom: var(--safe-bot);
+  flex-shrink: 0;
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 4px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--light);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.nav-btn .nav-icon { font-size: 22px; line-height: 1; }
+.nav-btn.active { color: var(--sage); }
+.nav-btn.active .nav-icon { transform: translateY(-1px); }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── HOME PAGE ── */
+.home-hero {
+  background: linear-gradient(160deg, #2C2C2C 0%, #3D4A44 100%);
+  padding: 24px 20px 28px;
+  color: var(--warm-white);
+}
+.home-hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sage-light);
+  margin-bottom: 8px;
+}
+.home-hero h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+.home-hero p { font-size: 13px; color: #B0B0B0; line-height: 1.55; }
+
+.week-strip {
+  display: flex;
+  gap: 8px;
+  padding: 16px 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.week-strip::-webkit-scrollbar { display: none; }
+.day-pill {
+  flex-shrink: 0;
+  background: var(--warm-white);
+  border: 1.5px solid var(--rule);
+  border-radius: 14px;
+  padding: 10px 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 64px;
+}
+.day-pill.today { border-color: var(--sage); background: var(--sage-pale); }
+.day-pill.done { border-color: #B8D4C8; background: #E8F2EE; }
+.day-pill-name { font-size: 10px; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: 0.08em; }
+.day-pill-treino { font-size: 13px; font-weight: 700; color: var(--charcoal); margin-top: 3px; }
+.day-pill-sub { font-size: 10px; color: var(--mid); margin-top: 1px; }
+.day-pill.today .day-pill-name { color: var(--sage); }
+
+.section-header {
+  padding: 20px 20px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.section-header h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.section-header a { font-size: 13px; color: var(--sage); text-decoration: none; font-weight: 500; }
+
+/* ── ALERT BANNER ── */
+.alert-banner {
+  margin: 0 16px 16px;
+  background: var(--danger-pale);
+  border-left: 3px solid var(--terra);
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+}
+.alert-banner strong { display: block; font-size: 12px; color: var(--terra); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.alert-banner p { font-size: 12.5px; color: #5A3020; line-height: 1.5; }
+
+/* ── TREINO CARD (home + treinos list) ── */
+.treino-list { padding: 0 16px 8px; display: flex; flex-direction: column; gap: 10px; }
+.tc {
+  background: var(--warm-white);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+  active: scale(0.98);
+}
+.tc:active { transform: scale(0.98); }
+.tc-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+}
+.tc-letter {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--sage-pale);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800;
+  color: var(--sage);
+  flex-shrink: 0;
+}
+.tc-letter.blush-bg { background: var(--blush-pale); color: var(--blush); }
+.tc-letter.terra-bg { background: #FFF0E8; color: var(--terra); }
+.tc-body { flex: 1; }
+.tc-title { font-size: 15px; font-weight: 600; }
+.tc-sub { font-size: 12px; color: var(--mid); margin-top: 2px; }
+.tc-arrow { color: var(--light); font-size: 18px; }
+.tc-progress {
+  height: 3px;
+  background: var(--rule);
+  margin: 0 16px 16px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.tc-progress-fill {
+  height: 100%;
+  background: var(--sage);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* ── TREINO DETAIL ── */
+.detail-hero {
+  background: linear-gradient(150deg, #2C2C2C 0%, #3D4A44 100%);
+  padding: 20px 20px 24px;
+  color: white;
+}
+.detail-back {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none; color: var(--sage-light);
+  font-size: 14px; cursor: pointer; padding: 0; margin-bottom: 16px;
+}
+.detail-hero h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.detail-hero p { font-size: 13px; color: #A0A0A0; }
+.detail-stats {
+  display: flex; gap: 16px; margin-top: 16px;
+}
+.detail-stat {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: center;
+}
+.detail-stat-val { font-size: 20px; font-weight: 700; }
+.detail-stat-lbl { font-size: 10px; color: #808080; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.ex-list { padding: 12px 16px 100px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ── EXERCISE ITEM ── */
+.ex-item {
+  background: var(--warm-white);
+  border: 1.5px solid var(--rule);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.ex-item.done { border-color: var(--sage-light); }
+.ex-item.highlight { border-color: var(--sage); background: var(--sage-pale); }
+.ex-item.warn-item { border-left: 3px solid var(--terra); }
+
+.ex-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px 12px;
+}
+.ex-check {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--rule);
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: transparent;
+}
+.ex-item.done .ex-check {
+  border-color: var(--sage);
+  background: var(--sage);
+  color: white;
+}
+.ex-main { flex: 1; }
+.ex-name { font-size: 14px; font-weight: 600; }
+.ex-note-text { font-size: 11.5px; color: var(--mid); margin-top: 2px; }
+.ex-note-text.warn { color: var(--terra); }
+.ex-meta {
+  display: flex; gap: 6px; align-items: center;
+}
+.ex-badge {
+  background: var(--sage-pale);
+  color: var(--sage);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.ex-badge.blush { background: var(--blush-pale); color: var(--blush); }
+.ex-badge.terra { background: #FFF0E8; color: var(--terra); }
+
+.ex-timer-btn {
+  background: var(--sage-pale);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sage);
+  cursor: pointer;
+  margin: 0 14px 12px;
+  display: block;
+  width: calc(100% - 28px);
+  text-align: center;
+}
+.ex-timer-btn:active { background: var(--sage-light); }
+
+/* ── TIMER MODAL ── */
+.timer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 200;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.timer-overlay.open { opacity: 1; pointer-events: all; }
+.timer-sheet {
+  background: var(--warm-white);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 24px calc(var(--safe-bot) + 24px);
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  transform: translateY(40px);
+  transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+}
+.timer-overlay.open .timer-sheet { transform: translateY(0); }
+.timer-handle {
+  width: 36px; height: 4px;
+  background: var(--rule);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+.timer-label { font-size: 13px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.timer-display {
+  font-size: 72px;
+  font-weight: 700;
+  letter-spacing: -3px;
+  color: var(--charcoal);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  margin-bottom: 24px;
+}
+.timer-display.running { color: var(--sage); }
+.timer-display.done-color { color: var(--terra); }
+.timer-btns { display: flex; gap: 10px; }
+.timer-btn-main {
+  flex: 1;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--sage);
+  color: white;
+}
+.timer-btn-main:active { opacity: 0.85; }
+.timer-btn-sec {
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1.5px solid var(--rule);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  color: var(--mid);
+}
+.timer-presets {
+  display: flex; gap: 8px; justify-content: center; margin-bottom: 20px;
+}
+.timer-preset {
+  background: var(--sage-pale);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sage);
+  cursor: pointer;
+}
+.timer-preset.active { background: var(--sage); color: white; }
+
+/* ── FUNDAÇÃO PAGE ── */
+.fund-card {
+  margin: 0 16px 12px;
+  background: var(--warm-white);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.fund-card-header {
+  display: flex; gap: 12px; align-items: center;
+  padding: 16px;
+  background: var(--sage-pale);
+}
+.fund-card-icon { font-size: 28px; }
+.fund-card-title { font-size: 15px; font-weight: 700; color: var(--charcoal); }
+.fund-card-sub { font-size: 12px; color: var(--mid); }
+.fund-card-body { padding: 14px 16px; }
+.fund-card-body p { font-size: 13.5px; color: var(--charcoal); line-height: 1.6; }
+.fund-step {
+  display: flex; gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--rule);
+}
+.fund-step:first-child { border-top: none; padding-top: 0; }
+.fund-step-num {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--sage);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.fund-step-text { font-size: 13px; color: var(--charcoal); line-height: 1.55; }
+.fund-step-text strong { color: var(--sage); }
+
+/* ── SEMANA / PROGRESSÃO CARDS ── */
+.prog-cards { padding: 0 16px 100px; display: flex; flex-direction: column; gap: 10px; }
+.prog-card {
+  background: var(--warm-white);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  gap: 14px;
+}
+.prog-num {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--sage-light);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 36px;
+  text-align: center;
+}
+.prog-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.prog-info p { font-size: 12.5px; color: var(--mid); line-height: 1.55; }
+
+/* ── ALERTAS CARDS ── */
+.alert-cards { padding: 0 16px 100px; display: flex; flex-direction: column; gap: 10px; }
+.alert-card {
+  background: var(--warm-white);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+}
+.alert-card .ac-icon { font-size: 24px; flex-shrink: 0; }
+.alert-card .ac-body h4 { font-size: 13.5px; font-weight: 700; margin-bottom: 4px; }
+.alert-card .ac-body p { font-size: 12.5px; color: var(--mid); line-height: 1.55; }
+.alert-card.red { border-left: 3px solid var(--danger); }
+.alert-card.amber { border-left: 3px solid var(--terra); }
+.alert-card.green { border-left: 3px solid var(--sage); }
+
+/* ── COMPLETE OVERLAY ── */
+.complete-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 300;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.complete-overlay.open { opacity: 1; pointer-events: all; }
+.complete-card {
+  background: var(--warm-white);
+  border-radius: 24px;
+  padding: 32px 28px;
+  text-align: center;
+  margin: 20px;
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.complete-overlay.open .complete-card { transform: scale(1); }
+.complete-emoji { font-size: 56px; margin-bottom: 12px; }
+.complete-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.complete-card p { font-size: 14px; color: var(--mid); line-height: 1.5; margin-bottom: 24px; }
+.complete-btn {
+  background: var(--sage);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* ── INSTALL MODAL ── */
+.install-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.install-modal.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Arrow pointing to bottom bar */
+.install-arrow-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+  animation: bounce-up 1.2s ease-in-out infinite;
+}
+@keyframes bounce-up {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+.install-arrow {
+  width: 0; height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-top: 22px solid white;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+}
+.install-arrow-line {
+  width: 3px;
+  height: 32px;
+  background: white;
+  border-radius: 2px;
+  margin-bottom: 0;
+  order: -1;
+  box-shadow: 0 0 8px rgba(255,255,255,0.4);
+}
+
+/* Sheet */
+.install-sheet {
+  background: var(--warm-white);
+  border-radius: 28px 28px 0 0;
+  padding: 28px 24px calc(var(--safe-bot) + 28px);
+  width: 100%;
+  max-width: 480px;
+  transform: translateY(60px);
+  transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+}
+.install-modal.open .install-sheet {
+  transform: translateY(0);
+}
+.install-handle {
+  width: 40px; height: 4px;
+  background: var(--rule);
+  border-radius: 2px;
+  margin: 0 auto 24px;
+}
+.install-icon-wrap {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--sage) 0%, #5A8070 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 24px rgba(122,158,142,0.4);
+}
+.install-sheet h2 {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin-bottom: 6px;
+}
+.install-sheet .install-tagline {
+  text-align: center;
+  font-size: 14px;
+  color: var(--mid);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 28px;
+  background: var(--cream);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+}
+.install-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+}
+.install-step:last-child { border-bottom: none; }
+.install-step-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--sage);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.install-step-body { flex: 1; }
+.install-step-body strong { display: block; font-size: 14px; margin-bottom: 2px; }
+.install-step-body span { font-size: 12.5px; color: var(--mid); line-height: 1.4; }
+.install-step-icon { font-size: 22px; flex-shrink: 0; }
+
+/* pulse on the share icon */
+.share-pulse {
+  display: inline-block;
+  animation: pulse-icon 1.5s ease-in-out infinite;
+}
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.25); }
+}
+
+.install-skip {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--mid);
+  font-size: 14px;
+  padding: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* ── CARDIO TABLE ── */
+.cardio-section { padding: 0 16px 20px; }
+.cardio-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--warm-white);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+}
+.cardio-table th {
+  padding: 10px 12px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mid);
+  background: var(--cream);
+  text-align: left;
+  font-weight: 600;
+}
+.cardio-table td {
+  padding: 11px 12px;
+  font-size: 13px;
+  border-top: 1px solid var(--rule);
+  color: var(--charcoal);
+  vertical-align: top;
+}
+.cardio-table td:first-child { font-weight: 700; color: var(--sage); white-space: nowrap; }
+
+/* ── UTILS ── */
+.pt16 { padding-top: 16px; }
+.pb100 { padding-bottom: 100px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="status-pad"></div>
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Início</div>
+      <div class="topbar-sub" id="topbar-sub">Pós-Cesárea · 5 meses</div>
+    </div>
+    <div class="topbar-badge" id="topbar-badge">Semana 1</div>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll-area" id="scroll-area">
+
+    <!-- ═══ PAGE: HOME ═══ -->
+    <div class="page active" id="page-home">
+
+      <div class="home-hero">
+        <div class="home-hero-eyebrow">Bom treino 💪</div>
+        <h2 id="home-greeting">Seu plano de hoje</h2>
+        <p id="home-desc">Selecione o treino do dia e comece com respiração diafragmática.</p>
+      </div>
+
+      <!-- Week strip -->
+      <div class="week-strip" id="week-strip"></div>
+
+      <div class="section-header">
+        <h3>Treinos</h3>
+      </div>
+
+      <div class="alert-banner">
+        <strong>⚠ Atenção</strong>
+        <p>Com diástase, consulte fisioterapeuta especializada em saúde pélvica antes de progredir cargas abdominais.</p>
+      </div>
+
+      <div class="treino-list" id="home-treino-list"></div>
+      <div style="height: 24px;"></div>
+    </div>
+
+    <!-- ═══ PAGE: TREINOS LIST ═══ -->
+    <div class="page" id="page-treinos">
+      <div class="section-header pt16">
+        <h3>Todos os treinos</h3>
+      </div>
+      <div class="treino-list" id="all-treino-list"></div>
+      <div style="height: 24px;"></div>
+    </div>
+
+    <!-- ═══ PAGE: DETAIL ═══ -->
+    <div class="page" id="page-detail">
+      <!-- Injected dynamically -->
+    </div>
+
+    <!-- ═══ PAGE: FUNDAÇÃO ═══ -->
+    <div class="page" id="page-fund">
+      <div class="section-header pt16">
+        <h3>Fundação</h3>
+      </div>
+
+      <div class="fund-card">
+        <div class="fund-card-header">
+          <div class="fund-card-icon">🫁</div>
+          <div>
+            <div class="fund-card-title">Respiração Diafragmática</div>
+            <div class="fund-card-sub">Fazer em todos os treinos · 2–3 min</div>
+          </div>
+        </div>
+        <div class="fund-card-body">
+          <div class="fund-step">
+            <div class="fund-step-num">1</div>
+            <div class="fund-step-text">Deite de costas com joelhos dobrados. Coloque uma mão no peito e outra na barriga.</div>
+          </div>
+          <div class="fund-step">
+            <div class="fund-step-num">2</div>
+            <div class="fund-step-text"><strong>Inspire</strong> pelo nariz expandindo as costelas lateralmente — a barriga sobe suavemente, o peito fica quieto.</div>
+          </div>
+          <div class="fund-step">
+            <div class="fund-step-num">3</div>
+            <div class="fund-step-text"><strong>Expire</strong> pela boca contraindo suavemente o abdômen para dentro e para cima. Sem forçar.</div>
+          </div>
+          <div class="fund-step">
+            <div class="fund-step-num">4</div>
+            <div class="fund-step-text">Repita 10× antes de cada treino. A partir da semana 5, fazer sentada ou em pé.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fund-card">
+        <div class="fund-card-header" style="background: var(--blush-pale);">
+          <div class="fund-card-icon">🌸</div>
+          <div>
+            <div class="fund-card-title">Kegel com Respiração</div>
+            <div class="fund-card-sub">3 séries × 10 reps · antes dos exercícios</div>
+          </div>
+        </div>
+        <div class="fund-card-body">
+          <div class="fund-step">
+            <div class="fund-step-num">1</div>
+            <div class="fund-step-text">Inspire naturalmente, relaxando o assoalho pélvico.</div>
+          </div>
+          <div class="fund-step">
+            <div class="fund-step-num">2</div>
+            <div class="fund-step-text"><strong>Na expiração</strong>, contraia o assoalho pélvico como se fosse "puxar" algo para dentro. Sustente 5 segundos.</div>
+          </div>
+          <div class="fund-step">
+            <div class="fund-step-num">3</div>
+            <div class="fund-step-text">Inspire e relaxe completamente. O relaxamento é tão importante quanto a contração.</div>
+          </div>
+          <div class="fund-step">
+            <div class="fund-step-num">4</div>
+            <div class="fund-step-text"><strong>Semana 5+:</strong> Kegel dinâmico — contrair enquanto faz a descida do agachamento e soltar no topo.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fund-card">
+        <div class="fund-card-header" style="background: #FFF0E8;">
+          <div class="fund-card-icon">🔍</div>
+          <div>
+            <div class="fund-card-title">Teste de Carga Abdominal</div>
+            <div class="fund-card-sub">Verificar antes de cada série pesada</div>
+          </div>
+        </div>
+        <div class="fund-card-body">
+          <p>Observe durante o exercício: protuberância na linha média, dor na cicatriz, sensação de peso pélvico ou escape urinário. <strong>Qualquer um desses sinais = reduzir carga ou pausar.</strong></p>
+        </div>
+      </div>
+
+      <div style="height: 100px;"></div>
+    </div>
+
+    <!-- ═══ PAGE: SEMANA ═══ -->
+    <div class="page" id="page-semana">
+      <div class="section-header pt16">
+        <h3>Semana &amp; Cardio</h3>
+      </div>
+
+      <div class="treino-list">
+        <div class="fund-card">
+          <div class="fund-card-header">
+            <div class="fund-card-icon">📅</div>
+            <div>
+              <div class="fund-card-title">Organização Semanal</div>
+            </div>
+          </div>
+          <div class="fund-card-body">
+            <div class="fund-step"><div class="fund-step-num" style="background:var(--sage);">S</div><div class="fund-step-text"><strong>Segunda</strong> — Treino A · Inferiores</div></div>
+            <div class="fund-step"><div class="fund-step-num" style="background:var(--blush);">T</div><div class="fund-step-text"><strong>Terça</strong> — Treino B · Superiores</div></div>
+            <div class="fund-step"><div class="fund-step-num" style="background:#A0A0A0;">Q</div><div class="fund-step-text"><strong>Quarta</strong> — Caminhada leve 20–30 min</div></div>
+            <div class="fund-step"><div class="fund-step-num" style="background:var(--terra);">Q</div><div class="fund-step-text"><strong>Quinta</strong> — Treino C · Inferiores</div></div>
+            <div class="fund-step"><div class="fund-step-num" style="background:#8A7AAE;">S</div><div class="fund-step-text"><strong>Sexta</strong> — Treino D · Superiores + Cardio</div></div>
+            <div class="fund-step"><div class="fund-step-num" style="background:#C8B090;">S</div><div class="fund-step-text"><strong>Sábado</strong> — Caminhada ou alongamento</div></div>
+            <div class="fund-step"><div class="fund-step-num" style="background:#D0D0D0;">D</div><div class="fund-step-text"><strong>Domingo</strong> — Descanso completo</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h3>Progressão de Cardio</h3>
+      </div>
+
+      <div class="cardio-section">
+        <table class="cardio-table">
+          <thead>
+            <tr><th>Semanas</th><th>Frequência</th><th>Protocolo</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1–2</td><td>3×</td><td>Caminhada 20–25 min, ritmo leve</td></tr>
+            <tr><td>3–4</td><td>4×</td><td>Caminhada 25–35 min, terreno plano</td></tr>
+            <tr><td>5–6</td><td>4×</td><td>2 min caminhada + 1 min trote · 25–30 min</td></tr>
+            <tr><td>7–8</td><td>4×</td><td>1,5 min caminhada + 1,5 min trote · 30 min</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px; color:var(--mid); margin-top:10px; line-height:1.5;">⚠ Cardio de impacto (corrida, jump) não deve ser introduzido sem avaliação do assoalho pélvico.</p>
+      </div>
+
+      <div class="section-header">
+        <h3>Progressão de Carga</h3>
+      </div>
+
+      <div class="prog-cards">
+        <div class="prog-card"><div class="prog-num">1–2</div><div class="prog-info"><h4>Adaptação — sem carga</h4><p>Foco na técnica, respiração e ativação. Carga simbólica apenas para aprender o movimento.</p></div></div>
+        <div class="prog-card"><div class="prog-num">3–4</div><div class="prog-info"><h4>Ativação — carga leve</h4><p>Introduzir carga leve. Aumentar só se a última rep ainda tiver técnica perfeita.</p></div></div>
+        <div class="prog-card"><div class="prog-num">5–6</div><div class="prog-info"><h4>Progressão — reps ou carga</h4><p>Aumentar 5–10% da carga OU adicionar 2 repetições. Nunca os dois ao mesmo tempo.</p></div></div>
+        <div class="prog-card"><div class="prog-num">7–8</div><div class="prog-info"><h4>Consolidação — refinar técnica</h4><p>Estabilizar cargas. Focar em controle excêntrico (descida lenta). Avaliar diástase antes de continuar.</p></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE: ALERTAS ═══ -->
+    <div class="page" id="page-alertas">
+      <div class="section-header pt16">
+        <h3>Segurança</h3>
+      </div>
+      <div class="alert-cards">
+        <div class="alert-card red">
+          <div class="ac-icon">🛑</div>
+          <div class="ac-body">
+            <h4>Interromper imediatamente</h4>
+            <p>Dor ou ardência na cicatriz · Sensação de peso ou pressão pélvica · Escape urinário durante o exercício · Protuberância visível na linha média do abdômen</p>
+          </div>
+        </div>
+        <div class="alert-card amber">
+          <div class="ac-icon">⚠️</div>
+          <div class="ac-body">
+            <h4>Monitorar com atenção</h4>
+            <p>Prender a respiração em qualquer exercício · Dor lombar que piora ao longo do treino · Desconforto persistente após a sessão</p>
+          </div>
+        </div>
+        <div class="alert-card green">
+          <div class="ac-icon">✅</div>
+          <div class="ac-body">
+            <h4>Manter sempre</h4>
+            <p>Abdômen levemente contraído sem prender o ar · Expirar no esforço · Qualidade do movimento antes de qualquer aumento de carga</p>
+          </div>
+        </div>
+        <div class="alert-card red">
+          <div class="ac-icon">🚫</div>
+          <div class="ac-body">
+            <h4>Evitar até avaliação fisioterapêutica</h4>
+            <p>Abdominais tradicionais (crunch, sit-up) · Prancha longa com carga · Exercícios de alto impacto (corrida, jump, burpee)</p>
+          </div>
+        </div>
+        <div class="alert-card amber">
+          <div class="ac-icon">🏥</div>
+          <div class="ac-body">
+            <h4>Recomendação principal</h4>
+            <p>Consultar fisioterapeuta especializada em saúde pélvica para avaliar o grau da diástase antes de progredir qualquer exercício com pressão intra-abdominal elevada.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end scroll-area -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-page="home" onclick="navigate('home')">
+      <span class="nav-icon">🏠</span>Início
+    </button>
+    <button class="nav-btn" data-page="treinos" onclick="navigate('treinos')">
+      <span class="nav-icon">💪</span>Treinos
+    </button>
+    <button class="nav-btn" data-page="fund" onclick="navigate('fund')">
+      <span class="nav-icon">🫁</span>Fundação
+    </button>
+    <button class="nav-btn" data-page="semana" onclick="navigate('semana')">
+      <span class="nav-icon">📅</span>Semana
+    </button>
+    <button class="nav-btn" data-page="alertas" onclick="navigate('alertas')">
+      <span class="nav-icon">⚠️</span>Alertas
+    </button>
+  </nav>
+</div>
+
+<!-- INSTALL MODAL -->
+<div class="install-modal" id="install-modal">
+  <div class="install-arrow-wrap">
+    <div class="install-arrow-line"></div>
+    <div class="install-arrow"></div>
+  </div>
+  <div class="install-sheet">
+    <div class="install-handle"></div>
+    <div class="install-icon-wrap">💪</div>
+    <h2>Instalar o app</h2>
+    <p class="install-tagline">Adicione à tela de início para acessar seu treino como um app, mesmo sem internet.</p>
+    <div class="install-steps">
+      <div class="install-step">
+        <div class="install-step-num">1</div>
+        <div class="install-step-body">
+          <strong>Toque em Compartilhar</strong>
+          <span>O botão fica na barra inferior do Safari</span>
+        </div>
+        <div class="install-step-icon"><span class="share-pulse">⬆️</span></div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">2</div>
+        <div class="install-step-body">
+          <strong>Role para baixo no menu</strong>
+          <span>Procure "Adicionar à Tela de Início"</span>
+        </div>
+        <div class="install-step-icon">📋</div>
+      </div>
+      <div class="install-step">
+        <div class="install-step-num">3</div>
+        <div class="install-step-body">
+          <strong>Toque em "Adicionar"</strong>
+          <span>O app aparece na sua tela como qualquer outro</span>
+        </div>
+        <div class="install-step-icon">✅</div>
+      </div>
+    </div>
+    <button class="install-skip" onclick="dismissInstall()">Agora não</button>
+  </div>
+</div>
+
+<!-- TIMER MODAL -->
+<div class="timer-overlay" id="timer-overlay" onclick="timerOverlayClick(event)">
+  <div class="timer-sheet">
+    <div class="timer-handle"></div>
+    <div class="timer-label">Descanso</div>
+    <div class="timer-presets">
+      <button class="timer-preset active" onclick="setTimerPreset(30)">30s</button>
+      <button class="timer-preset" onclick="setTimerPreset(45)">45s</button>
+      <button class="timer-preset" onclick="setTimerPreset(60)">60s</button>
+      <button class="timer-preset" onclick="setTimerPreset(90)">90s</button>
+    </div>
+    <div class="timer-display" id="timer-display">01:00</div>
+    <div class="timer-btns">
+      <button class="timer-btn-sec" onclick="resetTimer()">↺</button>
+      <button class="timer-btn-main" id="timer-toggle" onclick="toggleTimer()">Iniciar</button>
+      <button class="timer-btn-sec" onclick="closeTimer()">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETE OVERLAY -->
+<div class="complete-overlay" id="complete-overlay">
+  <div class="complete-card">
+    <div class="complete-emoji">🎉</div>
+    <h2>Treino concluído!</h2>
+    <p>Ótimo trabalho. Lembre-se de hidratar bem e descansar na próxima sessão.</p>
+    <button class="complete-btn" onclick="closeComplete()">Fechar</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const TREINOS = [
+  {
+    id: 'A',
+    title: 'Treino A',
+    sub: 'Inferiores — Quadríceps e Glúteos',
+    color: 'sage',
+    exercicios: [
+      { id:'A0', name:'Caminhada (aquecimento)', series:'—', reps:'5 min', note:'Ritmo confortável, respiração nasal', type:'warmup' },
+      { id:'A1', name:'Respiração Diafragmática + Kegel', series:'3', reps:'10 reps', note:'Fundação — não pular', type:'core' },
+      { id:'A2', name:'Agachamento Livre', series:'3', reps:'12 reps', note:'Expirar no esforço, core suave', timer:60 },
+      { id:'A3', name:'Leg Press 45°', series:'3', reps:'12 reps', note:'Sem prender respiração', timer:60 },
+      { id:'A4', name:'Cadeira Extensora', series:'3', reps:'15 reps', note:'⚠ Iniciar com carga leve — monitorar linha média', warn:true, timer:60 },
+      { id:'A5', name:'Afundo Estático', series:'3', reps:'10 cada perna', note:'Entrar na semana 3 se houver boa estabilidade', timer:60 },
+      { id:'A6', name:'Ponte de Glúteo', series:'3', reps:'15 reps', note:'Contrair assoalho pélvico na subida', timer:60 },
+      { id:'A7', name:'Panturrilha Sentada', series:'3', reps:'20 reps', timer:45 },
+      { id:'A8', name:'Bird Dog', series:'3', reps:'10 cada lado', note:'Respirar durante o movimento', type:'core', timer:60 },
+    ]
+  },
+  {
+    id: 'B',
+    title: 'Treino B',
+    sub: 'Superiores — Costas, Peito, Ombros e Braços',
+    color: 'blush',
+    exercicios: [
+      { id:'B0', name:'Bicicleta (aquecimento)', series:'—', reps:'5 min', note:'Resistência leve', type:'warmup' },
+      { id:'B1', name:'Respiração Diafragmática + Kegel', series:'3', reps:'10 reps', note:'Fundação — não pular', type:'core' },
+      { id:'B2', name:'Puxada Frontal', series:'3', reps:'12 reps', note:'Expirar na descida da barra', timer:60 },
+      { id:'B3', name:'Remada Baixa', series:'3', reps:'12 reps', note:'Postura ereta, sem curvar lombar', timer:60 },
+      { id:'B4', name:'Supino Máquina', series:'3', reps:'12 reps', note:'Expirar no empurrão', timer:60 },
+      { id:'B5', name:'Desenvolvimento de Ombros', series:'3', reps:'12 reps', note:'⚠ Carga moderada — monitorar pressão abdominal', warn:true, timer:60 },
+      { id:'B6', name:'Rosca Bíceps', series:'3', reps:'12 reps', timer:45 },
+      { id:'B7', name:'Tríceps Polia', series:'3', reps:'12 reps', timer:45 },
+      { id:'B8', name:'Dead Bug Adaptado', series:'3', reps:'10 cada lado', note:'Lombar colada ao chão, sem prender ar', type:'core', timer:60 },
+    ]
+  },
+  {
+    id: 'C',
+    title: 'Treino C',
+    sub: 'Inferiores — Posterior de Coxa e Glúteos',
+    color: 'terra',
+    exercicios: [
+      { id:'C0', name:'Caminhada (aquecimento)', series:'—', reps:'5 min', note:'Ritmo confortável', type:'warmup' },
+      { id:'C1', name:'Respiração Diafragmática + Kegel', series:'3', reps:'10 reps', note:'Fundação — não pular', type:'core' },
+      { id:'C2', name:'Stiff com Halteres', series:'3', reps:'12 reps', note:'Quadril para trás, coluna neutra', timer:60 },
+      { id:'C3', name:'Mesa Flexora', series:'3', reps:'15 reps', timer:60 },
+      { id:'C4', name:'Cadeira Abdutora', series:'3', reps:'15 reps', timer:45 },
+      { id:'C5', name:'Elevação Pélvica', series:'3', reps:'15 reps', note:'Contrair assoalho pélvico no topo', timer:60 },
+      { id:'C6', name:'Step-up em Banco Baixo', series:'3', reps:'10 cada perna', note:'Semana 3+ se houver boa estabilidade', timer:60 },
+      { id:'C7', name:'Panturrilha em Pé', series:'3', reps:'20 reps', timer:45 },
+      { id:'C8', name:'Bird Dog — Progressão', series:'3', reps:'10 cada lado', note:'Sem 5: adicionar resistência', type:'core', timer:60 },
+    ]
+  },
+  {
+    id: 'D',
+    title: 'Treino D',
+    sub: 'Superiores + Cardio',
+    color: 'sage',
+    exercicios: [
+      { id:'D0', name:'Respiração Diafragmática + Kegel', series:'3', reps:'10 reps', note:'Fundação — não pular', type:'core' },
+      { id:'D1', name:'Remada Articulada', series:'3', reps:'12 reps', timer:60 },
+      { id:'D2', name:'Puxada Frontal Neutra', series:'3', reps:'12 reps', timer:60 },
+      { id:'D3', name:'Crucifixo Máquina', series:'3', reps:'15 reps', note:'Amplitude segura, sem forçar cicatriz', timer:60 },
+      { id:'D4', name:'Elevação Lateral', series:'3', reps:'15 reps', note:'Peso leve, controle total', timer:45 },
+      { id:'D5', name:'Rosca Martelo', series:'3', reps:'12 reps', timer:45 },
+      { id:'D6', name:'Tríceps Corda', series:'3', reps:'12 reps', timer:45 },
+      { id:'D7', name:'Dead Bug Adaptado — Progressão', series:'3', reps:'10 cada lado', note:'Sem 5–8: mini-band', type:'core', timer:60 },
+      { id:'D8', name:'Caminhada Rápida / Cardio', series:'—', reps:'20–30 min', note:'Ver tabela de cardio na aba Semana', type:'cardio' },
+    ]
+  }
+];
+
+const WEEK = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
+const WEEK_PLAN = {1:'A', 2:'B', 3:'Caminhada', 4:'C', 5:'D', 6:'Caminhada', 0:'Descanso'};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let currentPage = 'home';
+let currentTreino = null;
+
+function getKey(id) { return 'treino_' + id + '_' + new Date().toDateString(); }
+function getDone(id) {
+  try { return JSON.parse(localStorage.getItem(getKey(id)) || '[]'); } catch { return []; }
+}
+function setDone(id, arr) {
+  localStorage.setItem(getKey(id), JSON.stringify(arr));
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+  if (page === 'detail') {
+    document.getElementById('page-detail').classList.add('active');
+  } else {
+    document.getElementById('page-' + page).classList.add('active');
+    document.querySelector('[data-page="' + page + '"]')?.classList.add('active');
+    currentPage = page;
+  }
+  document.getElementById('scroll-area').scrollTop = 0;
+  updateTopbar(page);
+}
+
+function updateTopbar(page) {
+  const titles = {
+    home: 'Início', treinos: 'Treinos', fund: 'Fundação',
+    semana: 'Semana & Cardio', alertas: 'Segurança', detail: currentTreino?.title || 'Treino'
+  };
+  document.getElementById('topbar-title').textContent = titles[page] || page;
+}
+
+// ═══════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════
+function buildHome() {
+  // Greeting
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'Bom dia! ☀️' : h < 18 ? 'Boa tarde! 🌤' : 'Boa noite! 🌙';
+  document.getElementById('home-greeting').textContent = greet;
+
+  // Week strip
+  const strip = document.getElementById('week-strip');
+  strip.innerHTML = '';
+  const today = new Date().getDay();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - today + i);
+    const dow = d.getDay();
+    const treino = WEEK_PLAN[dow];
+    const pill = document.createElement('div');
+    pill.className = 'day-pill' + (dow === today ? ' today' : '');
+    pill.innerHTML = `<div class="day-pill-name">${WEEK[dow]}</div><div class="day-pill-treino">${treino === 'Descanso' ? '😴' : treino === 'Caminhada' ? '🚶' : treino}</div><div class="day-pill-sub">${treino === 'Descanso' ? 'Descanso' : treino === 'Caminhada' ? 'Cardio' : 'Treino ' + treino}</div>`;
+    if (treino !== 'Descanso' && treino !== 'Caminhada') {
+      pill.onclick = () => openTreino(treino);
+    }
+    strip.appendChild(pill);
+  }
+
+  // Treino cards
+  buildTreinoList('home-treino-list');
+
+  // Install banner
+  buildInstallBanner();
+}
+
+function buildTreinoList(containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  TREINOS.forEach(t => {
+    const done = getDone(t.id);
+    const total = t.exercicios.length;
+    const pct = Math.round((done.length / total) * 100);
+    const colorClass = t.color === 'blush' ? 'blush-bg' : t.color === 'terra' ? 'terra-bg' : '';
+    const el = document.createElement('div');
+    el.className = 'tc';
+    el.innerHTML = `
+      <div class="tc-header">
+        <div class="tc-letter ${colorClass}">${t.id}</div>
+        <div class="tc-body">
+          <div class="tc-title">${t.title}</div>
+          <div class="tc-sub">${t.sub}</div>
+        </div>
+        <div class="tc-arrow">›</div>
+      </div>
+      <div class="tc-progress"><div class="tc-progress-fill" style="width:${pct}%"></div></div>
+    `;
+    el.onclick = () => openTreino(t.id);
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// DETAIL
+// ═══════════════════════════════════════════════
+function openTreino(id) {
+  currentTreino = TREINOS.find(t => t.id === id);
+  if (!currentTreino) return;
+  renderDetail();
+  navigate('detail');
+}
+
+function renderDetail() {
+  const t = currentTreino;
+  const done = getDone(t.id);
+  const total = t.exercicios.length;
+  const colorClass = t.color === 'blush' ? 'blush-bg' : t.color === 'terra' ? 'terra-bg' : '';
+
+  let html = `
+    <div class="detail-hero">
+      <button class="detail-back" onclick="navigate('${currentPage}')">‹ Voltar</button>
+      <h2>${t.title}</h2>
+      <p>${t.sub}</p>
+      <div class="detail-stats">
+        <div class="detail-stat"><div class="detail-stat-val">${total}</div><div class="detail-stat-lbl">Exercícios</div></div>
+        <div class="detail-stat"><div class="detail-stat-val">${done.length}</div><div class="detail-stat-lbl">Concluídos</div></div>
+        <div class="detail-stat"><div class="detail-stat-val">${Math.round((done.length/total)*100)}%</div><div class="detail-stat-lbl">Progresso</div></div>
+      </div>
+    </div>
+    <div class="ex-list">
+  `;
+
+  t.exercicios.forEach(ex => {
+    const isDone = done.includes(ex.id);
+    const isCore = ex.type === 'core';
+    const isWarmup = ex.type === 'warmup';
+    const isCardio = ex.type === 'cardio';
+    let itemClass = 'ex-item';
+    if (isDone) itemClass += ' done';
+    if (isCore) itemClass += ' highlight';
+    if (ex.warn) itemClass += ' warn-item';
+
+    let badgeHtml = '';
+    if (isCore) badgeHtml = `<span class="ex-badge blush">Core</span>`;
+    else if (isWarmup) badgeHtml = `<span class="ex-badge">Aquec.</span>`;
+    else if (isCardio) badgeHtml = `<span class="ex-badge terra">Cardio</span>`;
+
+    const noteClass = ex.warn ? 'ex-note-text warn' : 'ex-note-text';
+    const noteHtml = ex.note ? `<div class="${noteClass}">${ex.note}</div>` : '';
+    const timerBtn = ex.timer ? `<button class="ex-timer-btn" onclick="openTimer(${ex.timer})">⏱ Descanso ${ex.timer}s</button>` : '';
+
+    html += `
+      <div class="${itemClass}" id="ex-${ex.id}">
+        <div class="ex-row">
+          <button class="ex-check" onclick="toggleEx('${ex.id}')">${isDone ? '✓' : ''}</button>
+          <div class="ex-main">
+            <div class="ex-name">${ex.name}</div>
+            ${noteHtml}
+          </div>
+          <div class="ex-meta">
+            <span class="ex-badge">${ex.series} × ${ex.reps}</span>
+            ${badgeHtml}
+          </div>
+        </div>
+        ${timerBtn}
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  document.getElementById('page-detail').innerHTML = html;
+}
+
+function toggleEx(exId) {
+  const t = currentTreino;
+  let done = getDone(t.id);
+  if (done.includes(exId)) {
+    done = done.filter(d => d !== exId);
+  } else {
+    done.push(exId);
+  }
+  setDone(t.id, done);
+
+  // Re-render detail without scroll reset
+  const scrollPos = document.getElementById('scroll-area').scrollTop;
+  renderDetail();
+  document.getElementById('scroll-area').scrollTop = scrollPos;
+
+  // Check completion
+  if (done.length === t.exercicios.length) {
+    setTimeout(() => showComplete(), 400);
+  }
+}
+
+// ═══════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════
+let timerInterval = null;
+let timerTotal = 60;
+let timerRemaining = 60;
+let timerRunning = false;
+
+function openTimer(seconds) {
+  setTimerPreset(seconds);
+  document.getElementById('timer-overlay').classList.add('open');
+}
+
+function closeTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('timer-overlay').classList.remove('open');
+  document.getElementById('timer-toggle').textContent = 'Iniciar';
+}
+
+function timerOverlayClick(e) {
+  if (e.target === document.getElementById('timer-overlay')) closeTimer();
+}
+
+function setTimerPreset(s) {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerTotal = s;
+  timerRemaining = s;
+  document.getElementById('timer-toggle').textContent = 'Iniciar';
+  updateTimerDisplay();
+  document.querySelectorAll('.timer-preset').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === s);
+  });
+}
+
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timer-toggle').textContent = 'Continuar';
+    document.getElementById('timer-display').classList.remove('running');
+  } else {
+    if (timerRemaining === 0) { timerRemaining = timerTotal; }
+    timerRunning = true;
+    document.getElementById('timer-toggle').textContent = 'Pausar';
+    document.getElementById('timer-display').classList.add('running');
+    timerInterval = setInterval(() => {
+      timerRemaining--;
+      updateTimerDisplay();
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById('timer-toggle').textContent = 'Reiniciar';
+        document.getElementById('timer-display').classList.remove('running');
+        document.getElementById('timer-display').classList.add('done-color');
+        try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch(e){}
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerRemaining = timerTotal;
+  document.getElementById('timer-toggle').textContent = 'Iniciar';
+  document.getElementById('timer-display').classList.remove('running', 'done-color');
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerRemaining / 60);
+  const s = timerRemaining % 60;
+  document.getElementById('timer-display').textContent =
+    String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+// ═══════════════════════════════════════════════
+// COMPLETE
+// ═══════════════════════════════════════════════
+function showComplete() {
+  document.getElementById('complete-overlay').classList.add('open');
+}
+function closeComplete() {
+  document.getElementById('complete-overlay').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// INSTALL MODAL (iOS)
+// ═══════════════════════════════════════════════
+function buildInstallBanner() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone;
+  const dismissed = localStorage.getItem('install_dismissed');
+
+  if (isIOS && !isStandalone && !dismissed) {
+    // Show after a short delay so the page loads first
+    setTimeout(() => {
+      document.getElementById('install-modal').classList.add('open');
+    }, 800);
+  }
+}
+
+function dismissInstall() {
+  localStorage.setItem('install_dismissed', '1');
+  document.getElementById('install-modal').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// WEEK BADGE
+// ═══════════════════════════════════════════════
+function updateWeekBadge() {
+  const started = localStorage.getItem('start_date');
+  if (!started) {
+    localStorage.setItem('start_date', new Date().toDateString());
+  }
+  const startDate = new Date(localStorage.getItem('start_date'));
+  const diff = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24 * 7));
+  const week = Math.min(diff + 1, 8);
+  document.getElementById('topbar-badge').textContent = 'Semana ' + week;
+}
+
+// ═══════════════════════════════════════════════
+// SERVICE WORKER
+// ═══════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+buildHome();
+buildTreinoList('all-treino-list');
+updateWeekBadge();
+</script>
+</body>
+</html>
